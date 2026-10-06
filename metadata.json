@@ -1,0 +1,6 @@
+{
+  "name": "QuoteFlow - Reviews & Calls Demo",
+  "description": "Interactive demo of QuoteFlow's Reviews and Calls module for Australian commercial & residential cleaning companies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
