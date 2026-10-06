@@ -47,6 +47,7 @@ export default function App() {
   const [testModeEnabled, setTestModeEnabled] = useState<boolean>(true);
 
   const [selectedFeedbackItem, setSelectedFeedbackItem] = useState<PrivateFeedbackItem | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -197,23 +198,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-800 antialiased selection:bg-teal-500/20 selection:text-teal-900">
+    <div className="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col text-slate-800 antialiased selection:bg-teal-500/20 selection:text-teal-900">
       {/* Permanent Top Banner on every screen */}
       <Banner />
 
       {/* App Shell */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0">
-        {/* Sidebar Nav */}
+      <div className="flex-1 flex min-h-0 overflow-hidden relative">
+        {/* Sidebar Nav (Fixed & Pinned on Left) */}
         <Sidebar
           currentScreen={currentScreen}
           onSelectScreen={setCurrentScreen}
           activeCompany={activeCompany}
           unreadFeedbackCount={unreadFeedbackCount}
           missedCallsCount={missedCallsCount}
+          mobileMenuOpen={mobileMenuOpen}
+          onCloseMobileMenu={() => setMobileMenuOpen(false)}
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Header */}
           <Header
             currentScreenTitle={getScreenTitle()}
@@ -221,83 +224,86 @@ export default function App() {
             onCompanyChange={handleCompanyChange}
             systemMode={systemMode}
             testModeEnabled={testModeEnabled}
+            onOpenMobileMenu={() => setMobileMenuOpen(true)}
           />
 
-          {/* View Container */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            {currentScreen === 'overview' && (
-              <OverviewView
-                jobs={currentJobs}
-                feedback={currentFeedback}
-                calls={calls}
-                activeCompany={activeCompany}
-                onNavigate={setCurrentScreen}
-                onSelectFeedback={(item) => {
-                  setSelectedFeedbackItem(item);
-                  setCurrentScreen('private_feedback');
-                }}
-              />
-            )}
+          {/* Dedicated Scroll Container - Sidebar will never scroll up with this */}
+          <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+              {currentScreen === 'overview' && (
+                <OverviewView
+                  jobs={currentJobs}
+                  feedback={currentFeedback}
+                  calls={calls}
+                  activeCompany={activeCompany}
+                  onNavigate={setCurrentScreen}
+                  onSelectFeedback={(item) => {
+                    setSelectedFeedbackItem(item);
+                    setCurrentScreen('private_feedback');
+                  }}
+                />
+              )}
 
-            {currentScreen === 'review_requests' && (
-              <ReviewRequestsView
-                jobs={currentJobs}
-                activeCompany={activeCompany}
-                onSendRequest={handleSendRequest}
-                showToast={showToast}
-              />
-            )}
+              {currentScreen === 'review_requests' && (
+                <ReviewRequestsView
+                  jobs={currentJobs}
+                  activeCompany={activeCompany}
+                  onSendRequest={handleSendRequest}
+                  showToast={showToast}
+                />
+              )}
 
-            {currentScreen === 'private_feedback' && (
-              <PrivateFeedbackView
-                feedback={currentFeedback}
-                selectedItem={selectedFeedbackItem}
-                onSelectItem={setSelectedFeedbackItem}
-                onUpdateStatus={handleUpdateFeedbackStatus}
-                activeCompany={activeCompany}
-                showToast={showToast}
-              />
-            )}
+              {currentScreen === 'private_feedback' && (
+                <PrivateFeedbackView
+                  feedback={currentFeedback}
+                  selectedItem={selectedFeedbackItem}
+                  onSelectItem={setSelectedFeedbackItem}
+                  onUpdateStatus={handleUpdateFeedbackStatus}
+                  activeCompany={activeCompany}
+                  showToast={showToast}
+                />
+              )}
 
-            {currentScreen === 'call_tracking' && (
-              <CallTrackingView
-                calls={calls}
-                activeCompany={activeCompany}
-                onToggleBooked={handleToggleBooked}
-                onToggleCalledBack={handleToggleCalledBack}
-                showToast={showToast}
-              />
-            )}
+              {currentScreen === 'call_tracking' && (
+                <CallTrackingView
+                  calls={calls}
+                  activeCompany={activeCompany}
+                  onToggleBooked={handleToggleBooked}
+                  onToggleCalledBack={handleToggleCalledBack}
+                  showToast={showToast}
+                />
+              )}
 
-            {currentScreen === 'settings' && (
-              <SettingsView
-                systemMode={systemMode}
-                onSetSystemMode={(mode) => {
-                  setSystemMode(mode);
-                  setAuditLogs((prev) => [
-                    {
-                      id: `LOG-${Date.now()}`,
-                      adminName: 'Operations Staff',
-                      role: 'Staff Member',
-                      action: 'Mode changed',
-                      details: `System mode changed to ${mode}`,
-                      timestamp: 'Today, Just now',
-                    },
-                    ...prev,
-                  ]);
-                }}
-                testModeEnabled={testModeEnabled}
-                onToggleTestMode={setTestModeEnabled}
-                activeCompany={activeCompany}
-                auditLogs={auditLogs}
-                onSwitchEverythingOff={handleSwitchEverythingOff}
-                showToast={showToast}
-              />
-            )}
-          </main>
+              {currentScreen === 'settings' && (
+                <SettingsView
+                  systemMode={systemMode}
+                  onSetSystemMode={(mode) => {
+                    setSystemMode(mode);
+                    setAuditLogs((prev) => [
+                      {
+                        id: `LOG-${Date.now()}`,
+                        adminName: 'Operations Staff',
+                        role: 'Staff Member',
+                        action: 'Mode changed',
+                        details: `System mode changed to ${mode}`,
+                        timestamp: 'Today, Just now',
+                      },
+                      ...prev,
+                    ]);
+                  }}
+                  testModeEnabled={testModeEnabled}
+                  onToggleTestMode={setTestModeEnabled}
+                  activeCompany={activeCompany}
+                  auditLogs={auditLogs}
+                  onSwitchEverythingOff={handleSwitchEverythingOff}
+                  showToast={showToast}
+                />
+              )}
+            </main>
 
-          {/* Management Review UI Footer */}
-          <Footer />
+            {/* Management Review UI Footer */}
+            <Footer />
+          </div>
         </div>
       </div>
 

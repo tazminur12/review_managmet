@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, ChevronDown, Check, Phone } from 'lucide-react';
+import { Building2, ChevronDown, Check, Phone, Menu } from 'lucide-react';
 import { CompanyConfig, CompanyId, SystemMode } from '../types';
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
   onCompanyChange: (companyId: CompanyId) => void;
   systemMode: SystemMode;
   testModeEnabled: boolean;
+  onOpenMobileMenu?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onCompanyChange,
   systemMode,
   testModeEnabled,
+  onOpenMobileMenu,
 }) => {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -31,9 +33,19 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shrink-0">
-      {/* Left: Breadcrumb / Screen Title */}
+    <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shrink-0 sticky top-0 z-20">
+      {/* Left: Mobile Menu Toggle + Breadcrumb / Screen Title */}
       <div className="flex items-center gap-3">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="md:hidden p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <div>
           <nav className="text-xs text-slate-400 font-medium hidden sm:flex items-center gap-1.5">
             <span>Reviews & Calls</span>
